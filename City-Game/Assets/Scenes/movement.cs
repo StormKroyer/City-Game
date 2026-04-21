@@ -19,10 +19,13 @@ public class movement : MonoBehaviour
 
     private Rigidbody rb;
 
+    public Transform cam;
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true; // no tilt
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     void Update()
@@ -47,23 +50,31 @@ public class movement : MonoBehaviour
 
     void FixedUpdate()
     {
-        // 🔹 Movement
-        float moveX = Input.GetAxisRaw("Horizontal"); // A/D or Left/Right
-        float moveZ = Input.GetAxisRaw("Vertical");   // W/S or Up/Down
+        float moveX = Input.GetAxisRaw("Horizontal");
+        float moveZ = Input.GetAxisRaw("Vertical");
 
-        Vector3 inputDir = new Vector3(moveX, 0f, moveZ).normalized;
+        // 🔹 Get directions based on player rotation
+        Vector3 forward = cam.forward;
+        forward.y = 0;
+        Vector3 right = cam.right;
+        right.y = 0;
 
-        // Target velocity (XZ plane only)
+        // Keep movement flat (no vertical tilt influence)
+        forward.y = 0f;
+        right.y = 0f;
+
+        forward.Normalize();
+        right.Normalize();
+
+        // 🔹 Combine input with rotation
+        Vector3 inputDir = (forward * moveZ + right * moveX).normalized;
+
         float control = canJump ? 1f : airControlMultiplier;
         Vector3 targetVel = inputDir * moveSpeed * control;
 
-        // Current velocity (XZ only)
         Vector3 currentXZ = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
-
-        // How much we need to change
         Vector3 velChange = targetVel - currentXZ;
 
-        // Apply velocity change instantly (ignores mass)
         rb.AddForce(velChange, ForceMode.VelocityChange);
     }
 }
