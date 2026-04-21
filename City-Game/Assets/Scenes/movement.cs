@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
 
 public class movement : MonoBehaviour
 {
@@ -35,6 +36,11 @@ public class movement : MonoBehaviour
         if (canJump)
         {
             jumpsRemaining = setJumps;
+            //StartCoroutine(jumpcooldown());
+        }
+        else
+        {
+            jumpsRemaining = 0;
         }
 
         // 🔹 Jump
@@ -46,6 +52,7 @@ public class movement : MonoBehaviour
 
             jumpsRemaining--;
         }
+
     }
 
     void FixedUpdate()
@@ -76,5 +83,12 @@ public class movement : MonoBehaviour
         Vector3 velChange = targetVel - currentXZ;
 
         rb.AddForce(velChange, ForceMode.VelocityChange);
+    }
+
+    private IEnumerator jumpcooldown()
+    {
+        jumpsRemaining = setJumps;
+        yield return new WaitForSeconds(2);
+
     }
 }
